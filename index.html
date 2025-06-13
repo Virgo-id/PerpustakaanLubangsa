@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Selamat Datang</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0f0f;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Multiple Animated Blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 30s infinite ease-in-out;
+      z-index: -2;
+    }
+
+    .blob:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      background: linear-gradient(45deg, #00ffff, #0066ff);
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .blob:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(45deg, #ff00ff, #6600ff);
+      top: 60%;
+      left: 70%;
+      animation-delay: 10s;
+    }
+
+    .blob:nth-child(3) {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(45deg, #00ff99, #00ccff);
+      top: 40%;
+      left: 40%;
+      animation-delay: 20s;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-40px) scale(1.1); }
+      100% { transform: translateY(0px) scale(1); }
+    }
+
+    .container {
+      position: relative;
+      text-align: center;
+      z-index: 2;
+      animation: fadeIn 2s ease;
+    }
+
+    h1 {
+      font-size: 4em;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #00ffff, #ffffff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s infinite linear;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -500px 0; }
+      100% { background-position: 500px 0; }
+    }
+
+    p {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: 20px auto;
+      color: #ccc;
+      opacity: 0;
+      animation: fadeInUp 1.5s ease forwards;
+      animation-delay: 0.8s;
+    }
+
+    .enter-button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid white;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      animation: fadeInUp 2s ease forwards, pulse 2s infinite;
+      animation-delay: 1.5s;
+      opacity: 0;
+    }
+
+    .enter-button:hover {
+      background: white;
+      color: #0f0f0f;
+      box-shadow: 0 0 30px rgba(255,255,255,0.6);
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+      50% { box-shadow: 0 0 25px rgba(255,255,255,0.6); }
+      100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background blobs -->
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+
+  <!-- Konten utama -->
+  <div class="container">
+    <h1>Selamat Datang</h1>
+    <p>di dunia statistik perpustakaan Lubangsa</p>
+    <button class="enter-button" onclick="window.location.href='data.html'">Masuk</button>
+  </div>
+
+</body>
+</html>
