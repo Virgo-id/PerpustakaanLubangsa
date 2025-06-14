@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Pustakawan</title>
+<link rel="icon" href="logo.png" type="image/png">
+  <style>
+    * {
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    height: 100vh;
+    background: white;
+    color: black;
+    }
+    .sidebar {
+      width: 240px;
+      background-color:green;
+      color: white;
+      padding-top: 20px;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      box-shadow: 3px 0 8px rgba(0,0,0,0.1);
+      animation: slideInSidebar 3.6s ease forwards;    
+      transform: translateX(-100%);
+    }
+    @keyframes slideInSidebar {
+      to { transform: translateX(0); }
+    }
+    .sidebar h2 {
+      text-align: center;
+      font-size: 22px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      padding: 15px 20px;
+      cursor: pointer;
+      font-size: 18px;
+      border-radius: 10px;
+      margin: 10px;
+    }
+    .sidebar ul li:hover {
+      background-color: #27ae60;
+    }
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form input, form textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      animation: fadeIn 0.2s ease;
+      text-align: left;
+    }
+    .card.pengumuman {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    button {
+      padding: 8px 16px;
+      margin-right: 5px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #27ae60;
+    }
+    .form-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .form-group input {
+      flex: 1;
+    }
+    .label {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .label-list {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Pustakawan Mode</h2>
+    <ul>
+      <li onclick="loadSection('pengumuman')">Pengumuman</li>
+      <li onclick="loadSection('catatan')">Catatan</li>
+      <li onclick="loadSection('keterlambatan')">Keterlambatan</li>
+      <li onclick="loadSection('hutang')">Hutang</li>
+      <li onclick="window.location.href='data.html'">Statistik Pengunjung</li>
+    </ul>
+  </div>
+  <div class="content">
+    <h1 id="sectionTitle">📢 Pengumuman Hari Ini</h1>
+    <form id="dataForm">
+      <div id="formFields"></div>
+      <button type="submit" id="submitButton">Simpan</button>
+    </form>
+    <div class="label-list" id="listLabel"></div>
+    <div id="dataList"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXq4JgLjUXZ_tuH-nc5i8Dp3nHRanbcCU",
+      authDomain: "perpustakaanlubangsa.firebaseapp.com",
+      databaseURL: "https://perpustakaanlubangsa-default-rtdb.firebaseio.com",
+      projectId: "perpustakaanlubangsa",
+      storageBucket: "perpustakaanlubangsa.firebasestorage.app",
+      messagingSenderId: "14620616039",
+      appId: "1:14620616039:web:f6887aeb09e64f51a1bbc2",
+      measurementId: "G-XR0Y0PLW5X"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentSection = "pengumuman";
+    const form = document.getElementById("dataForm");
+    const list = document.getElementById("dataList");
+    const title = document.getElementById("sectionTitle");
+    const fields = document.getElementById("formFields");
+    const submitButton = document.getElementById("submitButton");
+    const listLabel = document.getElementById("listLabel");
+
+    const fieldTemplates = {
+      pengumuman: () => {
+        title.textContent = "📢 Pengumuman Hari Ini";
+        submitButton.style.display = "none";
+        listLabel.textContent = "";
+        return "";
+      },
+      catatan: () => {
+        title.textContent = "Catatan";
+        submitButton.style.display = "inline-block";
+        listLabel.textContent = "Daftar";
+        return `<div class="label">Tambah Catatan</div>
+                <textarea id="isi" placeholder="Isi Catatan" required></textarea>`;
+      },
+      keterlambatan: () => {
+        title.textContent = "Keterlambatan";
+        submitButton.style.display = "inline-block";
+        listLabel.textContent = "Daftar";
+        return `<div class="label">Tambah Keterlambatan</div>
+                <div class="form-group">
+                  <input type="text" id="nama" placeholder="Nama" required />
+                  <input type="text" id="buku" placeholder="Judul Buku" required />
+                  <input type="text" id="nominal" placeholder="Nominal" required oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+                </div>`;
+      },
+      hutang: () => {
+        title.textContent = "Hutang";
+        submitButton.style.display = "inline-block";
+        listLabel.textContent = "Daftar";
+        return `<div class="label">Tambah Hutang</div>
+                <div class="form-group">
+                  <input type="text" id="nama" placeholder="Nama" required />
+                  <input type="text" id="nominal" placeholder="Nominal" required oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+                  <input type="text" id="keterangan" placeholder="Keterangan" required />
+                </div>`;
+      }
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let data = {};
+      if (currentSection === "pengumuman") return;
+      else if (currentSection === "catatan") {
+        data = { isi: form.isi.value.trim() };
+      } else if (currentSection === "keterlambatan") {
+        data = {
+          Nama: capitalizeWords(form.nama.value.trim()),
+          Buku: capitalizeWords(form.buku.value.trim()),
+          Nominal: formatRupiah(form.nominal.value.trim())
+        };
+      } else if (currentSection === "hutang") {
+        data = {
+          Nama: capitalizeWords(form.nama.value.trim()),
+          Nominal: formatRupiah(form.nominal.value.trim()),
+          Keterangan: capitalizeWords(form.keterangan.value.trim())
+        };
+      }
+      await addDoc(collection(db, currentSection), data);
+      form.reset();
+      loadData();
+    });
+
+    function formatRupiah(angka) {
+      return angka.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function capitalizeWords(str) {
+      return str.replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    window.loadSection = (section) => {
+      currentSection = section;
+      fields.innerHTML = fieldTemplates[section]();
+      loadData();
+    };
+
+    async function loadData() {
+      list.innerHTML = "";
+      if (currentSection === "pengumuman") {
+        const ref = doc(db, "pengumuman", "utama");
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          const div = document.createElement("div");
+          div.className = "card pengumuman";
+          div.innerHTML = `
+            <div style="font-size: 24px">${data.isi}</div>
+            <br><button onclick='editData()'>Edit</button>
+          `;
+          list.appendChild(div);
+        } else {
+          await setDoc(ref, { isi: "Belum ada pengumuman." });
+          loadData();
+        }
+        return;
+      }
+
+      const querySnapshot = await getDocs(collection(db, currentSection));
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = Object.entries(data).map(([k, v]) => `<b>${capitalizeWords(k)}:</b> ${v}<br>`).join("") +
+          `<br><button onclick="hapusData('${docSnap.id}')">Hapus</button>`;
+        list.appendChild(div);
+      });
+    }
+
+    window.hapusData = async (id) => {
+      await deleteDoc(doc(db, currentSection, id));
+      loadData();
+    };
+
+    window.editData = async () => {
+      const ref = doc(db, "pengumuman", "utama");
+      const snap = await getDoc(ref);
+      const oldIsi = snap.exists() ? snap.data().isi : "";
+      const newIsi = prompt("Edit isi pengumuman:", oldIsi);
+      if (newIsi !== null) {
+        await setDoc(ref, { isi: newIsi });
+        loadData();
+      }
+    };
+
+    loadSection(currentSection);
+  </script>
+</body>
+</html>
