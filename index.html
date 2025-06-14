@@ -37,7 +37,7 @@
     }
 
     .progress-bar {
-      width: 300px;
+      width: 500px;
       height: 20px;
       background-color: #333;
       border-radius: 10px;
@@ -49,7 +49,7 @@
       height: 100%;
       width: 0%;
       background-color: #00ffcc;
-      animation: fillBar 2s linear forwards;
+      animation: fillBar 3s linear forwards;
     }
 
     @keyframes fadeIn {
@@ -65,7 +65,7 @@
 </head>
 <body>
   <div class="loading-container">
-    <div class="loading-text">Memuat...</div>
+    <div class="loading-text">Memuat Dashboard Pustakawan</div>
     <div class="progress-bar">
       <div class="progress-fill"></div>
     </div>
@@ -74,7 +74,7 @@
   <script>
     setTimeout(() => {
       window.location.href = "perpustakaan.html"; // Ganti dengan halaman tujuan
-    }, 2200); // Sesuaikan dengan durasi animasi progress bar
+    }, 4200); // Sesuaikan dengan durasi animasi progress bar
   </script>
 </body>
 </html>
