@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard Pustakawan</title>
-<link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="logo.png" type="image/png">
   <style>
     * {
       box-sizing: border-box;
       transition: all 0.2s ease;
     }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    height: 100vh;
-    background: white;
-    color: black;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+      background: white;
+      color: black;
     }
     .sidebar {
       width: 240px;
-      background-color:green;
+      background-color: green;
       color: white;
       padding-top: 20px;
       border-top-right-radius: 20px;
@@ -31,7 +31,7 @@
     @keyframes slideInSidebar {
       to { transform: translateX(0); }
     }
-    .sidebar h2 {
+    .sidebar h1 {
       text-align: center;
       font-size: 22px;
     }
@@ -73,11 +73,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: left;
     }
-    .card.pengumuman {
-      text-align: center;
-      font-size: 32px;
-      font-weight: bold;
-    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
@@ -118,7 +113,6 @@
   <div class="sidebar">
     <h1>Dashboard</h1>
     <ul>
-      <li onclick="loadSection('pengumuman')">Pengumuman</li>
       <li onclick="loadSection('catatan')">Catatan</li>
       <li onclick="loadSection('keterlambatan')">Keterlambatan</li>
       <li onclick="loadSection('hutang')">Hutang</li>
@@ -126,19 +120,19 @@
     </ul>
   </div>
   <div class="content">
-    <h1 id="sectionTitle">📢 Pengumuman Hari Ini</h1>
+    <h1 id="sectionTitle">Catatan</h1>
     <form id="dataForm">
       <div id="formFields"></div>
       <button type="submit" id="submitButton">Simpan</button>
     </form>
-    <div class="label-list" id="listLabel"></div>
+    <div class="label-list" id="listLabel">Daftar</div>
     <div id="dataList"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
     import {
-      getFirestore, collection, getDocs, addDoc, deleteDoc, updateDoc, doc, getDoc, setDoc
+      getFirestore, collection, getDocs, addDoc, deleteDoc, doc
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -155,7 +149,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let currentSection = "pengumuman";
+    let currentSection = "catatan";
     const form = document.getElementById("dataForm");
     const list = document.getElementById("dataList");
     const title = document.getElementById("sectionTitle");
@@ -164,12 +158,6 @@
     const listLabel = document.getElementById("listLabel");
 
     const fieldTemplates = {
-      pengumuman: () => {
-        title.textContent = "📢 Pengumuman Hari Ini";
-        submitButton.style.display = "none";
-        listLabel.textContent = "";
-        return "";
-      },
       catatan: () => {
         title.textContent = "Catatan";
         submitButton.style.display = "inline-block";
@@ -204,8 +192,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       let data = {};
-      if (currentSection === "pengumuman") return;
-      else if (currentSection === "catatan") {
+      if (currentSection === "catatan") {
         data = { isi: form.isi.value.trim() };
       } else if (currentSection === "keterlambatan") {
         data = {
@@ -241,32 +228,13 @@
 
     async function loadData() {
       list.innerHTML = "";
-      if (currentSection === "pengumuman") {
-        const ref = doc(db, "pengumuman", "utama");
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          const div = document.createElement("div");
-          div.className = "card pengumuman";
-          div.innerHTML = `
-            <div style="font-size: 24px">${data.isi}</div>
-            <br><button onclick='editData()'>Edit</button>
-          `;
-          list.appendChild(div);
-        } else {
-          await setDoc(ref, { isi: "Belum ada pengumuman." });
-          loadData();
-        }
-        return;
-      }
-
       const querySnapshot = await getDocs(collection(db, currentSection));
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = Object.entries(data).map(([k, v]) => `<b>${capitalizeWords(k)}:</b> ${v}<br>`).join("") +
-          `<br><button onclick="hapusData('${docSnap.id}')">Hapus</button>`;
+          `<br><button onclick="hapusData('${docSnap.id}')" disabled>Hapus</button>`;
         list.appendChild(div);
       });
     }
@@ -276,18 +244,41 @@
       loadData();
     };
 
-    window.editData = async () => {
-      const ref = doc(db, "pengumuman", "utama");
-      const snap = await getDoc(ref);
-      const oldIsi = snap.exists() ? snap.data().isi : "";
-      const newIsi = prompt("Edit isi pengumuman:", oldIsi);
-      if (newIsi !== null) {
-        await setDoc(ref, { isi: newIsi });
-        loadData();
-      }
-    };
-
     loadSection(currentSection);
+  </script>
+
+  <!-- Proteksi Edit -->
+  <script>
+    function lockAll() {
+      document.querySelectorAll('input, textarea, select, button').forEach(el => {
+        if (el.type !== "button" && el.id !== "submitButton") {
+          el.disabled = true;
+        }
+      });
+    }
+
+    function unlockAll() {
+      document.querySelectorAll('input, textarea, select, button').forEach(el => {
+        el.disabled = false;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lockAll();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        const pw = prompt("Masukkan password untuk mengedit:");
+        if (pw === "123499") {
+          unlockAll();
+          alert("Edit mode diaktifkan.");
+        } else {
+          alert("Password salah.");
+        }
+      }
+    });
   </script>
 </body>
 </html>
