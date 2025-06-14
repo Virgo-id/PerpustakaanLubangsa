@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -35,6 +35,20 @@
     header a.active, header a:hover {
       background: white;
       color: black;
+    }
+
+    .back-button-container {
+      padding: 15px 20px;
+    }
+
+    .back-button-container button {
+      padding: 8px 16px;
+      background-color: green;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     main {
@@ -108,7 +122,13 @@
 </head>
 <body>
   <header id="nav">
-</header>
+  </header>
+
+  <!-- Tombol kembali -->
+  <div class="back-button-container">
+    <button onclick="history.back()">← Kembali</button>
+  </div>
+
   <main>
     <h2 id="judul-bulan"></h2>
     <div class="card">Total Pengunjung Bulan Ini: <span id="total">0</span></div>
@@ -254,7 +274,6 @@
 
       document.getElementById("total").textContent = data.total || 0;
 
-      // Jenjang
       document.getElementById("ket-jenjang").innerHTML = jenjangLabels.map((label, i) => {
         const val = data['jenjang_'+label.toLowerCase()] || 0;
         chartJenjang.data.datasets[0].data[i] = val;
@@ -262,7 +281,6 @@
       }).join('');
       chartJenjang.update();
 
-      // Baca & Pinjam
       document.getElementById("ket-bp").innerHTML = bpLabels.map((label, i) => {
         const val = data['bp_'+label.toLowerCase()] || 0;
         chartBP.data.datasets[0].data[i] = val;
@@ -270,7 +288,6 @@
       }).join('');
       chartBP.update();
 
-      // Kategori
       document.getElementById("ket-kategori").innerHTML = kategoriLabels.map((label, i) => {
         const val = data['kt_'+kategoriKeys[i]] || 0;
         chartKategori.data.datasets[0].data[i] = val;
