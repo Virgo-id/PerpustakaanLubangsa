@@ -2,161 +2,321 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Selamat Datang</title>
+  <title>Dashboard Pengunjung Perpustakaan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * {
+    body {
       margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
     }
 
-    body {
-      background: #0f0f0f;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
+    header {
+      background: linear-gradient(90deg, #007bff, #00c6ff);
       color: white;
-      height: 100vh;
+      padding: 15px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: background 0.3s;
+    }
+
+    header a.active, header a:hover {
+      background: white;
+      color: #007bff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .card {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      padding: 20px;
+      margin: 15px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      gap: 20px;
+    }
+
+    .chart-container {
+      flex: 1;
+      min-width: 320px;
+      max-width: 480px;
+    }
+
+    #bp-chart-container canvas {
+      max-height: 200px;
+    }
+
+    .keterangan {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .keterangan div {
       display: flex;
       align-items: center;
-      justify-content: center;
-      position: relative;
+      margin: 6px 0;
+      font-size: 15px;
     }
 
-    /* Multiple Animated Blobs */
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.4;
-      animation: float 30s infinite ease-in-out;
-      z-index: -2;
+    .color-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      margin-right: 8px;
     }
 
-    .blob:nth-child(1) {
-      width: 600px;
-      height: 600px;
-      background: linear-gradient(45deg, #00ffff, #0066ff);
-      top: 20%;
-      left: 10%;
-      animation-delay: 0s;
-    }
-
-    .blob:nth-child(2) {
-      width: 500px;
-      height: 500px;
-      background: linear-gradient(45deg, #ff00ff, #6600ff);
-      top: 60%;
-      left: 70%;
-      animation-delay: 10s;
-    }
-
-    .blob:nth-child(3) {
-      width: 400px;
-      height: 400px;
-      background: linear-gradient(45deg, #00ff99, #00ccff);
-      top: 40%;
-      left: 40%;
-      animation-delay: 20s;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-40px) scale(1.1); }
-      100% { transform: translateY(0px) scale(1); }
-    }
-
-    .container {
-      position: relative;
-      text-align: center;
-      z-index: 2;
-      animation: fadeIn 2s ease;
-    }
-
-    h1 {
-      font-size: 4em;
-      margin-bottom: 20px;
-      background: linear-gradient(90deg, #00ffff, #ffffff, #00ffff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 3s infinite linear;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: -500px 0; }
-      100% { background-position: 500px 0; }
-    }
-
-    p {
-      font-size: 1.2em;
-      max-width: 600px;
-      margin: 20px auto;
-      color: #ccc;
-      opacity: 0;
-      animation: fadeInUp 1.5s ease forwards;
-      animation-delay: 0.8s;
-    }
-
-    .enter-button {
-      margin-top: 30px;
-      padding: 15px 40px;
-      font-size: 1.2em;
-      font-weight: bold;
-      color: white;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid white;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.4s ease;
-      box-shadow: 0 0 20px rgba(255,255,255,0.2);
-      animation: fadeInUp 2s ease forwards, pulse 2s infinite;
-      animation-delay: 1.5s;
-      opacity: 0;
-    }
-
-    .enter-button:hover {
-      background: white;
-      color: #0f0f0f;
-      box-shadow: 0 0 30px rgba(255,255,255,0.6);
-      transform: scale(1.05);
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-      50% { box-shadow: 0 0 25px rgba(255,255,255,0.6); }
-      100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
     }
   </style>
 </head>
 <body>
+  <header id="nav"></header>
+  <main>
+    <h2 id="judul-bulan"></h2>
+    <div class="card">Total Pengunjung Bulan Ini: <span id="total">0</span></div>
 
-  <!-- Background blobs -->
-  <div class="blob"></div>
-  <div class="blob"></div>
-  <div class="blob"></div>
+    <!-- Jenjang Pendidikan -->
+    <div class="section">
+      <div class="keterangan" id="ket-jenjang"></div>
+      <div class="chart-container"><canvas id="chart-jenjang"></canvas></div>
+    </div>
 
-  <!-- Konten utama -->
-  <div class="container">
-    <h1>Selamat Datang</h1>
-    <p>di dunia statistik perpustakaan Lubangsa</p>
-    <button class="enter-button" onclick="window.location.href='data.html'">Masuk</button>
-  </div>
+    <!-- Baca & Pinjam -->
+    <div class="section">
+      <div class="keterangan" id="ket-bp"></div>
+      <div class="chart-container" id="bp-chart-container"><canvas id="chart-bp"></canvas></div>
+    </div>
 
+    <!-- Kategori -->
+    <div class="section">
+      <div class="keterangan" id="ket-kategori"></div>
+      <div class="chart-container"><canvas id="chart-kategori"></canvas></div>
+    </div>
+
+    <div class="card">Pengunjung Terajin: <span id="pengunjung-terajin">-</span></div>
+  </main>
+
+  <!-- Firebase & App Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBT1IjzeoBgcD4YtXqbDrV4K8rTFDoVZc0",
+      authDomain: "virgo-16c52.firebaseapp.com",
+      databaseURL: "https://virgo-16c52-default-rtdb.firebaseio.com",
+      projectId: "virgo-16c52",
+      storageBucket: "virgo-16c52.appspot.com",
+      messagingSenderId: "437394544268",
+      appId: "1:437394544268:web:d479ac08030bdd6c500da9",
+      measurementId: "G-YJK63782KS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase(app);
+
+    const months = ["Mei","Juni","Juli","Agustus","September","Oktober","November","Desember","Januari","Februari","Maret","April"];
+    let curr = 0;
+
+    const nav = document.getElementById("nav");
+    months.forEach((m,i)=>{
+      const a = document.createElement("a");
+      a.href="#";
+      a.textContent=m;
+      a.onclick=()=>{curr=i; loadMonth(); updateActive();};
+      nav.appendChild(a);
+    });
+
+    function updateActive() {
+      [...nav.children].forEach((el, idx) => {
+        el.classList.toggle("active", idx === curr);
+      });
+    }
+
+    const jenjangLabels = ['SLTP', 'SLTA', 'PT'];
+    const jenjangColors = ['#FF6384','#36A2EB','#FFCE56'];
+
+    const chartJenjang = new Chart(document.getElementById("chart-jenjang").getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: jenjangLabels,
+        datasets: [{
+          data: [0,0,0],
+          backgroundColor: jenjangColors,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    const bpLabels = ['Baca','Pinjam'];
+    const bpColors = ['#4BC0C0','#9966FF'];
+
+    const chartBP = new Chart(document.getElementById("chart-bp").getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: bpLabels,
+        datasets: [{
+          data: [0,0],
+          backgroundColor: bpColors
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    const kategoriLabels = [
+      "Sejarah dan Geografi","Kesusastraan","Komik","Agama",
+      "Filsafat dan Psikologi","Ilmu Murni","Ilmu Sosial",
+      "Ilmu Bahasa","Berita","Karya Umum"
+    ];
+    const kategoriKeys = [
+      "sejarah","sastra","komik","agama",
+      "filsafat","ilmurni","ilsosial","ilbahasa","berita","karyaumum"
+    ];
+    const kategoriColors = ['#FF6633','#FF33FF','#33FF66','#33FFFF','#FF3333','#33AAFF','#AAFF33','#333FFF','#FFAA33','#AA33FF'];
+
+    const chartKategori = new Chart(document.getElementById("chart-kategori").getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: kategoriLabels,
+        datasets: [{
+          data: Array(10).fill(0),
+          backgroundColor: kategoriColors
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    function makeColorBox(color, label, value) {
+      return `<div><div class="color-box" style="background:${color}"></div>${label}: ${value}</div>`;
+    }
+
+    async function loadMonth(){
+      const m = months[curr];
+      document.getElementById("judul-bulan").textContent = "Data Bulan " + m;
+
+      const snapshot = await get(ref(db, "bulan/" + m));
+      const data = snapshot.exists() ? snapshot.val() : {};
+
+      document.getElementById("total").textContent = data.total || 0;
+
+      // Jenjang
+      document.getElementById("ket-jenjang").innerHTML = jenjangLabels.map((label, i) => {
+        const val = data['jenjang_'+label.toLowerCase()] || 0;
+        chartJenjang.data.datasets[0].data[i] = val;
+        return makeColorBox(jenjangColors[i], label, val);
+      }).join('');
+      chartJenjang.update();
+
+      // Baca & Pinjam
+      document.getElementById("ket-bp").innerHTML = bpLabels.map((label, i) => {
+        const val = data['bp_'+label.toLowerCase()] || 0;
+        chartBP.data.datasets[0].data[i] = val;
+        return makeColorBox(bpColors[i], label, val);
+      }).join('');
+      chartBP.update();
+
+      // Kategori
+      document.getElementById("ket-kategori").innerHTML = kategoriLabels.map((label, i) => {
+        const val = data['kt_'+kategoriKeys[i]] || 0;
+        chartKategori.data.datasets[0].data[i] = val;
+        return makeColorBox(kategoriColors[i], label, val);
+      }).join('');
+      chartKategori.update();
+
+      document.getElementById("pengunjung-terajin").textContent = data.terajin || "-";
+      updateActive();
+    }
+
+    window.enableEdit = async function () {
+      const m = months[curr];
+      const data = {
+        total: prompt("Total pengunjung:", document.getElementById("total").textContent),
+      };
+
+      jenjangLabels.forEach(lbl => {
+        const key = 'jenjang_' + lbl.toLowerCase();
+        data[key] = prompt(lbl + ":", chartJenjang.data.datasets[0].data[jenjangLabels.indexOf(lbl)] || 0);
+      });
+
+      bpLabels.forEach(lbl => {
+        const key = 'bp_' + lbl.toLowerCase();
+        data[key] = prompt(lbl + ":", chartBP.data.datasets[0].data[bpLabels.indexOf(lbl)] || 0);
+      });
+
+      kategoriKeys.forEach((key, i) => {
+        data['kt_' + key] = prompt(kategoriLabels[i] + ":", chartKategori.data.datasets[0].data[i] || 0);
+      });
+
+      data.terajin = prompt("Nama Pengunjung Terajin:", document.getElementById("pengunjung-terajin").textContent);
+
+      await set(ref(db, "bulan/" + m), data);
+      loadMonth();
+    }
+
+    window.addEventListener('keydown', e => {
+      if(e.ctrlKey && e.key.toLowerCase() === 'e'){
+        e.preventDefault();
+        const pass = prompt("Masukkan password untuk mengedit:");
+        if(pass === '1234a'){
+          enableEdit();
+        } else alert("Password salah!");
+      }
+    });
+
+    loadMonth();
+  </script>
 </body>
 </html>
