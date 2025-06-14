@@ -60,7 +60,6 @@
       margin-bottom: 20px;
     }
 
-    /* Kolom input dan textarea lembut dan modern */
     form input, form textarea {
       width: 100%;
       margin-bottom: 10px;
@@ -209,6 +208,8 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (isLocked) return;
+
       let data = {};
       if (currentSection === "catatan") {
         data = { isi: form.isi.value.trim() };
@@ -252,15 +253,36 @@
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = Object.entries(data).map(([k, v]) => `<b>${capitalizeWords(k)}:</b> ${v}<br>`).join("") +
-          `<br><button onclick="hapusData('${docSnap.id}')">Hapus</button>`;
+          `<br><button ${isLocked ? "disabled" : ""} onclick="hapusData('${docSnap.id}')">Hapus</button>`;
         list.appendChild(div);
       });
     }
 
     window.hapusData = async (id) => {
+      if (isLocked) return;
       await deleteDoc(doc(db, currentSection, id));
       loadData();
     };
+
+    // Fitur Penguncian
+    let isLocked = true;
+    function toggleEditMode() {
+      const input = prompt("Masukkan password untuk edit:");
+      if (input === "123499") {
+        isLocked = false;
+        alert("Mode edit aktif.");
+        loadSection(currentSection);
+      } else {
+        alert("Password salah.");
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        toggleEditMode();
+      }
+    });
 
     loadSection(currentSection);
   </script>
