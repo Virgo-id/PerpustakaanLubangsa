@@ -19,11 +19,13 @@
       overflow: hidden;
     }
 
+    /* Kotak kiri */
     .left-bar {
       width: 40px;
       background-color: #27ae60;
     }
 
+    /* Sidebar */
     .right-bar {
       width: 40px;
       background-color: #27ae60;
@@ -69,16 +71,16 @@
       font-size: 18px;
       border-radius: 10px;
       margin: 10px;
-    }
-
-    .sidebar-content li.selected {
-      background-color: #1f8c4c;
+      transition: all 0.3s ease;
     }
 
     .sidebar-content li:hover {
-      background-color: #1f8c4c;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
+    /* Konten utama */
     .main {
       flex: 1;
       padding: 30px;
@@ -141,7 +143,6 @@
       font-weight: bold;
       font-size: 18px;
     }
-
   </style>
 </head>
 <body>
@@ -181,8 +182,7 @@
       projectId: "perpustakaanlubangsa",
       storageBucket: "perpustakaanlubangsa.firebasestorage.app",
       messagingSenderId: "14620616039",
-      appId: "1:14620616039:web:f6887aeb09e64f51a1bbc2",
-      measurementId: "G-XR0Y0PLW5X"
+      appId: "1:14620616039:web:f6887aeb09e64f51a1bbc2"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -279,14 +279,29 @@
       loadData();
     };
 
-    // Sidebar buka hanya dengan klik
+    // Sidebar klik buka-tutup
     const rightBar = document.getElementById("rightBar");
+    const sidebar = document.getElementById("sidebar");
+
     document.addEventListener("click", (e) => {
       if (!rightBar.contains(e.target)) {
         rightBar.classList.remove("open");
       } else if (!rightBar.classList.contains("open")) {
         rightBar.classList.add("open");
       }
+    });
+
+    // Sidebar auto tampil sesaat
+    window.addEventListener("DOMContentLoaded", () => {
+      rightBar.classList.add("open");
+      let aktif = false;
+
+      sidebar.addEventListener("mouseenter", () => aktif = true);
+      document.addEventListener("keydown", () => aktif = true);
+
+      setTimeout(() => {
+        if (!aktif) rightBar.classList.remove("open");
+      }, 3000);
     });
 
     loadSection(currentSection);
