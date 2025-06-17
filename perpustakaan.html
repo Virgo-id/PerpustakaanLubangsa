@@ -19,13 +19,11 @@
       overflow: hidden;
     }
 
-    /* Kotak kiri */
     .left-bar {
       width: 40px;
       background-color: #27ae60;
     }
 
-    /* Sidebar */
     .right-bar {
       width: 40px;
       background-color: #27ae60;
@@ -80,7 +78,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    /* Konten utama */
     .main {
       flex: 1;
       padding: 30px;
@@ -146,6 +143,17 @@
   </style>
 </head>
 <body>
+
+  <!-- Cek akses -->
+  <script>
+    if (localStorage.getItem("akses_dashboard") !== "boleh") {
+      window.location.href = "index.html";
+    }
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("akses_dashboard");
+    });
+  </script>
+
   <div class="left-bar"></div>
 
   <div class="main" id="mainContent">
@@ -279,7 +287,6 @@
       loadData();
     };
 
-    // Sidebar klik buka-tutup
     const rightBar = document.getElementById("rightBar");
     const sidebar = document.getElementById("sidebar");
 
@@ -291,14 +298,11 @@
       }
     });
 
-    // Sidebar auto tampil sesaat
     window.addEventListener("DOMContentLoaded", () => {
       rightBar.classList.add("open");
       let aktif = false;
-
       sidebar.addEventListener("mouseenter", () => aktif = true);
       document.addEventListener("keydown", () => aktif = true);
-
       setTimeout(() => {
         if (!aktif) rightBar.classList.remove("open");
       }, 3000);
