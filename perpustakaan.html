@@ -3,57 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard Pustakawan</title>
-  <link rel="icon" href="logo.png" type="image/png">
   <style>
     * {
       box-sizing: border-box;
-      transition: all 0.2s ease;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
     }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
       display: flex;
-      height: 100vh;
-      background: white;
-      color: black;
+      background-color: white;
+      overflow: hidden;
     }
-    .sidebar {
+
+    .left-bar {
+      width: 40px;
+      background-color: #27ae60;
+    }
+
+    .right-bar {
+      width: 40px;
+      background-color: #27ae60;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .right-bar.open {
       width: 240px;
-      background-color: green;
-      color: white;
+    }
+
+    .sidebar-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100%;
+      background-color: #27ae60;
       padding-top: 20px;
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
-      box-shadow: 3px 0 8px rgba(0,0,0,0.1);
-      animation: slideInSidebar 1.6s ease forwards;    
-      transform: translateX(-100%);
+      color: white;
+      display: none;
+      flex-direction: column;
+      animation: slideIn 0.3s ease forwards;
     }
-    @keyframes slideInSidebar {
-      to { transform: translateX(0); }
+
+    .right-bar.open .sidebar-content {
+      display: flex;
     }
-    .sidebar h2 {
-      text-align: center;
-      font-size: 22px;
+
+    @keyframes slideIn {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    .sidebar ul {
+
+    .sidebar-content ul {
       list-style: none;
       padding: 0;
     }
-    .sidebar ul li {
+
+    .sidebar-content li {
       padding: 15px 20px;
       cursor: pointer;
       font-size: 18px;
       border-radius: 10px;
       margin: 10px;
     }
-    .sidebar ul li:hover {
-      background-color: #27ae60;
+
+    .sidebar-content li.selected {
+      background-color: #1f8c4c;
     }
-    .content {
+
+    .sidebar-content li:hover {
+      background-color: #1f8c4c;
+    }
+
+    .main {
       flex: 1;
       padding: 30px;
       overflow-y: auto;
     }
+
     h1 {
       font-size: 28px;
       text-align: center;
@@ -68,13 +99,6 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       background-color: #e9f9ee;
-      transition: box-shadow 0.3s ease, border-color 0.3s ease;
-    }
-
-    form input:focus, form textarea:focus {
-      outline: none;
-      border-color: #2ecc71;
-      box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
     }
 
     .card {
@@ -85,15 +109,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: left;
     }
-    .card.pengumuman {
-      text-align: center;
-      font-size: 32px;
-      font-weight: bold;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+
     button {
       padding: 8px 16px;
       margin-right: 5px;
@@ -104,46 +120,52 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #27ae60;
-    }
+
     .form-group {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .form-group input {
       flex: 1;
     }
+
     .label {
       font-weight: bold;
       margin-top: 10px;
     }
+
     .label-list {
       margin-top: 10px;
       font-weight: bold;
       font-size: 18px;
     }
+
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h1>Dashboard</h1>
-    <ul>
-      <li onclick="loadSection('catatan')">Catatan</li>
-      <li onclick="loadSection('keterlambatan')">Keterlambatan</li>
-      <li onclick="loadSection('hutang')">Hutang</li>
-      <li onclick="window.location.href='data.html'">Statistik Pengunjung</li>
-    </ul>
-  </div>
-  <div class="content">
+  <div class="left-bar"></div>
+
+  <div class="main" id="mainContent">
     <h1 id="sectionTitle">Catatan</h1>
     <form id="dataForm">
       <div id="formFields"></div>
-      <button type="submit" id="submitButton">Simpan</button>
+      <button type="submit">Simpan</button>
     </form>
     <div class="label-list" id="listLabel"></div>
     <div id="dataList"></div>
+  </div>
+
+  <div class="right-bar" id="rightBar">
+    <div class="sidebar-content" id="sidebar">
+      <ul id="menuList">
+        <li onclick="loadSection('catatan')">Catatan</li>
+        <li onclick="loadSection('keterlambatan')">Keterlambatan</li>
+        <li onclick="loadSection('hutang')">Hutang</li>
+        <li onclick="window.location.href='data.html'">Statistik</li>
+      </ul>
+    </div>
   </div>
 
   <script type="module">
@@ -171,20 +193,17 @@
     const list = document.getElementById("dataList");
     const title = document.getElementById("sectionTitle");
     const fields = document.getElementById("formFields");
-    const submitButton = document.getElementById("submitButton");
     const listLabel = document.getElementById("listLabel");
 
     const fieldTemplates = {
       catatan: () => {
         title.textContent = "Catatan";
-        submitButton.style.display = "inline-block";
         listLabel.textContent = "Daftar";
         return `<div class="label">Tambah Catatan</div>
                 <textarea id="isi" placeholder="Isi Catatan" required></textarea>`;
       },
       keterlambatan: () => {
         title.textContent = "Keterlambatan";
-        submitButton.style.display = "inline-block";
         listLabel.textContent = "Daftar";
         return `<div class="label">Tambah Keterlambatan</div>
                 <div class="form-group">
@@ -195,7 +214,6 @@
       },
       hutang: () => {
         title.textContent = "Hutang";
-        submitButton.style.display = "inline-block";
         listLabel.textContent = "Daftar";
         return `<div class="label">Tambah Hutang</div>
                 <div class="form-group">
@@ -208,8 +226,6 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (isLocked) return;
-
       let data = {};
       if (currentSection === "catatan") {
         data = { isi: form.isi.value.trim() };
@@ -253,34 +269,23 @@
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = Object.entries(data).map(([k, v]) => `<b>${capitalizeWords(k)}:</b> ${v}<br>`).join("") +
-          `<br><button ${isLocked ? "disabled" : ""} onclick="hapusData('${docSnap.id}')">Hapus</button>`;
+          `<br><button onclick="hapusData('${docSnap.id}')">Hapus</button>`;
         list.appendChild(div);
       });
     }
 
     window.hapusData = async (id) => {
-      if (isLocked) return;
       await deleteDoc(doc(db, currentSection, id));
       loadData();
     };
 
-    // Fitur Penguncian
-    let isLocked = true;
-    function toggleEditMode() {
-      const input = prompt("Masukkan password untuk edit:");
-      if (input === "123499") {
-        isLocked = false;
-        alert("Mode edit aktif.");
-        loadSection(currentSection);
-      } else {
-        alert("Password salah.");
-      }
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.key.toLowerCase() === "e") {
-        e.preventDefault();
-        toggleEditMode();
+    // Sidebar buka hanya dengan klik
+    const rightBar = document.getElementById("rightBar");
+    document.addEventListener("click", (e) => {
+      if (!rightBar.contains(e.target)) {
+        rightBar.classList.remove("open");
+      } else if (!rightBar.classList.contains("open")) {
+        rightBar.classList.add("open");
       }
     });
 
