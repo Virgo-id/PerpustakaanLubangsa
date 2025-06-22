@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -38,7 +38,6 @@
     #sidebar a {
       padding: 12px 24px;
       display: block;
-      color: white;
       text-decoration: none;
       color: black;
     }
@@ -86,11 +85,7 @@
     .chart-container {
       flex: 1;
       min-width: 320px;
-      max-width: 480px;
-    }
-
-    #bp-chart-container canvas {
-      max-height: 200px;
+      max-width: 100%;
     }
 
     .keterangan {
@@ -120,7 +115,6 @@
 </head>
 <body>
 
-  <!-- Sidebar Navigasi Bulan -->
   <div id="sidebar">
     <div class="sidebar-header">Pilih Bulan</div>
     <nav id="nav"></nav>
@@ -129,28 +123,34 @@
   <main>
     <h2 id="judul-bulan"></h2>
 
-    <!-- Klik ini untuk membuka navigasi bulan -->
-    <div class="card" onclick="toggleSidebar()">Total Pengunjung Bulan Ini: <span id="total">0</span></div>
+    <div class="card" onclick="toggleSidebar()"><b>Total Pengunjung</b> <span id="total">0</span></div>
 
-    <!-- Jenjang Pendidikan -->
-    <div class="section">
-      <div class="keterangan" id="ket-jenjang"></div>
-      <div class="chart-container"><canvas id="chart-jenjang"></canvas></div>
+    <!-- PER BULAN -->
+    <div id="section-bulanan">
+      <div class="section">
+        <div class="keterangan" id="ket-jenjang"></div>
+        <div class="chart-container"><canvas id="chart-jenjang"></canvas></div>
+      </div>
+
+      <div class="section">
+        <div class="keterangan" id="ket-bp"></div>
+        <div class="chart-container"><canvas id="chart-bp"></canvas></div>
+      </div>
+
+      <div class="section">
+        <div class="keterangan" id="ket-kategori"></div>
+        <div class="chart-container"><canvas id="chart-kategori"></canvas></div>
+      </div>
+
+      <div class="card"><b>Pengunjung Terajin</b> <span id="pengunjung-terajin">-</span></div>
     </div>
 
-    <!-- Baca & Pinjam -->
-    <div class="section">
-      <div class="keterangan" id="ket-bp"></div>
-      <div class="chart-container" id="bp-chart-container"><canvas id="chart-bp"></canvas></div>
+    <!-- PERBANDINGAN -->
+    <div class="section" id="section-perbandingan" style="display:none">
+      <div class="chart-container">
+        <canvas id="chart-perbandingan"></canvas>
+      </div>
     </div>
-
-    <!-- Kategori -->
-    <div class="section">
-      <div class="keterangan" id="ket-kategori"></div>
-      <div class="chart-container"><canvas id="chart-kategori"></canvas></div>
-    </div>
-
-    <div class="card">Pengunjung Terajin: <span id="pengunjung-terajin">-</span></div>
   </main>
 
   <script type="module">
@@ -177,22 +177,37 @@
     let curr = 0;
 
     const nav = document.getElementById("nav");
-    months.forEach((m,i)=>{
+
+    // Tambah tab perbandingan
+    const perbandinganLink = document.createElement("a");
+    perbandinganLink.textContent = "Perbandingan";
+    perbandinganLink.href = "#";
+    perbandinganLink.onclick = () => {
+      loadComparisonChart();
+      updateActive("perbandingan");
+      closeSidebar();
+    };
+    nav.appendChild(perbandinganLink);
+
+    months.forEach((m, i) => {
       const a = document.createElement("a");
-      a.href="#";
-      a.textContent=m;
-      a.onclick=()=>{
-        curr=i;
+      a.href = "#";
+      a.textContent = m;
+      a.onclick = () => {
+        curr = i;
         loadMonth();
-        updateActive();
+        updateActive(i);
         closeSidebar();
       };
       nav.appendChild(a);
     });
 
-    function updateActive() {
+    function updateActive(index) {
       [...nav.children].forEach((el, idx) => {
-        el.classList.toggle("active", idx === curr);
+        el.classList.remove("active");
+        if ((index === "perbandingan" && idx === 0) || idx === index + 1) {
+          el.classList.add("active");
+        }
       });
     }
 
@@ -201,21 +216,8 @@
 
     const chartJenjang = new Chart(document.getElementById("chart-jenjang").getContext('2d'), {
       type: 'bar',
-      data: {
-        labels: jenjangLabels,
-        datasets: [{
-          data: [0,0,0],
-          backgroundColor: jenjangColors,
-          borderRadius: 6
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        plugins: { legend: { display: false } },
-        scales: { x: { beginAtZero: true } },
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      data: { labels: jenjangLabels, datasets: [{ data: [0,0,0], backgroundColor: jenjangColors, borderRadius: 6 }] },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } }, responsive: true, maintainAspectRatio: false }
     });
 
     const bpLabels = ['Baca','Pinjam'];
@@ -223,107 +225,80 @@
 
     const chartBP = new Chart(document.getElementById("chart-bp").getContext('2d'), {
       type: 'pie',
-      data: {
-        labels: bpLabels,
-        datasets: [{
-          data: [0,0],
-          backgroundColor: bpColors
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      data: { labels: bpLabels, datasets: [{ data: [0,0], backgroundColor: bpColors }] },
+      options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
     });
 
-    const kategoriLabels = [
-      "Sejarah dan Geografi","Kesusastraan","Komik","Agama",
-      "Filsafat dan Psikologi","Ilmu Murni","Ilmu Sosial",
-      "Ilmu Bahasa","Berita","Karya Umum"
-    ];
-    const kategoriKeys = [
-      "sejarah","sastra","komik","agama",
-      "filsafat","ilmurni","ilsosial","ilbahasa","berita","karyaumum"
-    ];
+    const kategoriLabels = ["Sejarah dan Geografi","Kesusastraan","Komik","Agama","Filsafat dan Psikologi","Ilmu Murni","Ilmu Sosial","Ilmu Bahasa","Berita","Karya Umum"];
+    const kategoriKeys = ["sejarah","sastra","komik","agama","filsafat","ilmurni","ilsosial","ilbahasa","berita","karyaumum"];
     const kategoriColors = ['#FF6633','#FF33FF','#33FF66','#33FFFF','#FF3333','#33AAFF','#AAFF33','#333FFF','#FFAA33','#AA33FF'];
 
     const chartKategori = new Chart(document.getElementById("chart-kategori").getContext('2d'), {
       type: 'doughnut',
-      data: {
-        labels: kategoriLabels,
-        datasets: [{
-          data: Array(10).fill(0),
-          backgroundColor: kategoriColors
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      data: { labels: kategoriLabels, datasets: [{ data: Array(10).fill(0), backgroundColor: kategoriColors }] },
+      options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
+    });
+
+    const chartPerbandingan = new Chart(document.getElementById("chart-perbandingan").getContext('2d'), {
+      type: 'bar',
+      data: { labels: months, datasets: [{ label: 'Total Pengunjung', data: Array(months.length).fill(0), backgroundColor: '#4285F4' }] },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
     function makeColorBox(color, label, value) {
       return `<div><div class="color-box" style="background:${color}"></div>${label}: ${value}</div>`;
     }
 
-    async function loadMonth(){
+    async function loadMonth() {
+      document.getElementById("section-bulanan").style.display = "block";
+      document.getElementById("section-perbandingan").style.display = "none";
       const m = months[curr];
       document.getElementById("judul-bulan").textContent = "Data Bulan " + m;
-
       const snapshot = await get(ref(db, "bulan/" + m));
       const data = snapshot.exists() ? snapshot.val() : {};
 
       document.getElementById("total").textContent = data.total || 0;
+      document.getElementById("pengunjung-terajin").textContent = data.terajin || "-";
 
       document.getElementById("ket-jenjang").innerHTML = jenjangLabels.map((label, i) => {
-        const val = data['jenjang_'+label.toLowerCase()] || 0;
+        const val = data['jenjang_' + label.toLowerCase()] || 0;
         chartJenjang.data.datasets[0].data[i] = val;
         return makeColorBox(jenjangColors[i], label, val);
       }).join('');
       chartJenjang.update();
 
       document.getElementById("ket-bp").innerHTML = bpLabels.map((label, i) => {
-        const val = data['bp_'+label.toLowerCase()] || 0;
+        const val = data['bp_' + label.toLowerCase()] || 0;
         chartBP.data.datasets[0].data[i] = val;
         return makeColorBox(bpColors[i], label, val);
       }).join('');
       chartBP.update();
 
       document.getElementById("ket-kategori").innerHTML = kategoriLabels.map((label, i) => {
-        const val = data['kt_'+kategoriKeys[i]] || 0;
+        const val = data['kt_' + kategoriKeys[i]] || 0;
         chartKategori.data.datasets[0].data[i] = val;
         return makeColorBox(kategoriColors[i], label, val);
       }).join('');
       chartKategori.update();
+    }
 
-      document.getElementById("pengunjung-terajin").textContent = data.terajin || "-";
-      updateActive();
+    async function loadComparisonChart() {
+      document.getElementById("judul-bulan").textContent = "Perbandingan Bulanan Total Pengunjung";
+      document.getElementById("section-bulanan").style.display = "none";
+      document.getElementById("section-perbandingan").style.display = "block";
+
+      const dataArr = await Promise.all(months.map(m => get(ref(db, "bulan/" + m)).then(s => s.exists() ? (s.val().total || 0) : 0)));
+      chartPerbandingan.data.datasets[0].data = dataArr;
+      chartPerbandingan.update();
     }
 
     window.enableEdit = async function () {
       const m = months[curr];
-      const data = {
-        total: prompt("Total pengunjung:", document.getElementById("total").textContent),
-      };
-
-      jenjangLabels.forEach(lbl => {
-        const key = 'jenjang_' + lbl.toLowerCase();
-        data[key] = prompt(lbl + ":", chartJenjang.data.datasets[0].data[jenjangLabels.indexOf(lbl)] || 0);
-      });
-
-      bpLabels.forEach(lbl => {
-        const key = 'bp_' + lbl.toLowerCase();
-        data[key] = prompt(lbl + ":", chartBP.data.datasets[0].data[bpLabels.indexOf(lbl)] || 0);
-      });
-
-      kategoriKeys.forEach((key, i) => {
-        data['kt_' + key] = prompt(kategoriLabels[i] + ":", chartKategori.data.datasets[0].data[i] || 0);
-      });
-
+      const data = { total: prompt("Total pengunjung:", document.getElementById("total").textContent) };
+      jenjangLabels.forEach(lbl => data['jenjang_' + lbl.toLowerCase()] = prompt(lbl + ":", chartJenjang.data.datasets[0].data[jenjangLabels.indexOf(lbl)] || 0));
+      bpLabels.forEach(lbl => data['bp_' + lbl.toLowerCase()] = prompt(lbl + ":", chartBP.data.datasets[0].data[bpLabels.indexOf(lbl)] || 0));
+      kategoriKeys.forEach((key, i) => data['kt_' + key] = prompt(kategoriLabels[i] + ":", chartKategori.data.datasets[0].data[i] || 0));
       data.terajin = prompt("Nama Pengunjung Terajin:", document.getElementById("pengunjung-terajin").textContent);
-
       await set(ref(db, "bulan/" + m), data);
       loadMonth();
     }
